@@ -2,7 +2,7 @@ version: "3.8"
 
 services:
   user-service:
-    build: ./user-service
+    image: youssefamr705/user-service:latest
     ports:
       - 5000:5000
     environment:
@@ -16,7 +16,7 @@ services:
       replicas: 2
 
   product-service:
-    build: ./product-service
+    image: youssefamr705/product-service:latest
     ports:
       - 5001:5001
     environment:
@@ -29,7 +29,7 @@ services:
       replicas: 2
 
   shopping-cart-service:
-    build: ./shopping-cart-service
+    image: youssefamr705/shopping-cart-service:latest
     ports:
       - 5002:5002
     environment:
@@ -42,7 +42,7 @@ services:
       replicas: 2
 
   order-service:
-    build: ./order-service
+    image: youssefamr705/order-service:latest
     ports:
       - 5003:5003
     environment:
@@ -55,7 +55,7 @@ services:
       replicas: 2
 
   payment-service:
-    build: ./payment-service
+    image: youssefamr705/payment-service:latest
     ports:
       - 5004:5004
     environment:
@@ -69,7 +69,7 @@ services:
       replicas: 2
 
   notification-service:
-    build: ./notification-service
+    image: youssefamr705/notification-service:latest
     ports:
       - 5005:5005
     environment:
@@ -82,7 +82,7 @@ services:
       - ecommerce-network
 
   mongo:
-    image: mongo
+    image: mongo:latest
     ports:
       - "27017:27017"
     volumes:
@@ -94,8 +94,10 @@ services:
     image: nginx:latest
     ports:
       - "80:80"
-    volumes:
-      - ./nginx.conf:/etc/nginx/nginx.conf
+    # Using Swarm configs instead of a local volume mount
+    configs:
+      - source: nginx_config
+        target: /etc/nginx/nginx.conf
     networks:
       - ecommerce-network
     depends_on:
@@ -108,6 +110,11 @@ services:
 volumes:
   mongo-data:
 
+# Define the config object Swarm will distribute to the Nginx containers
+configs:
+  nginx_config:
+    file: ./nginx.conf
+
 networks:
   ecommerce-network:
-    driver: bridge
+    driver: overlay # Crucial for multi-node Docker Swarm communication
