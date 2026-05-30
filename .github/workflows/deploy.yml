@@ -13,6 +13,15 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v3
 
+      - name: Copy docker-compose.yml to EC2
+        uses: appleboy/scp-action@master
+        with:
+          host: ${{ secrets.EC2_HOST }}
+          username: ${{ secrets.EC2_USERNAME }}
+          key: ${{ secrets.EC2_SSH_KEY }}
+          source: "docker-compose.yml"
+          target: "~/"
+
       - name: Deploy to Docker Swarm via SSH
         uses: appleboy/ssh-action@master
         with:
@@ -20,5 +29,4 @@ jobs:
           username: ${{ secrets.EC2_USERNAME }}
           key: ${{ secrets.EC2_SSH_KEY }}
           script: |
-            cd ~/scalable-ecommerce-backend
-            docker stack deploy -c docker-compose.yml ecommerce
+            docker stack deploy -c ~/docker-compose.yml ecommerce
