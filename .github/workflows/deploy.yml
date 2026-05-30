@@ -13,15 +13,19 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v3
 
-      - name: Copy docker-compose.yml to EC2
+      # Updated step to copy both required configurations to the EC2 instance
+      - name: Copy Configuration Files to EC2
         uses: appleboy/scp-action@master
         with:
           host: ${{ secrets.EC2_HOST }}
           username: ${{ secrets.EC2_USERNAME }}
           key: ${{ secrets.EC2_SSH_KEY }}
-          source: "docker-compose.yml"
+          source: |
+            docker-compose.yml
+            nginx.conf
           target: "~/"
 
+      # Updated step to deploy using Swarm's overlay-network registry handling
       - name: Deploy to Docker Swarm via SSH
         uses: appleboy/ssh-action@master
         with:
@@ -29,4 +33,4 @@ jobs:
           username: ${{ secrets.EC2_USERNAME }}
           key: ${{ secrets.EC2_SSH_KEY }}
           script: |
-            docker stack deploy -c ~/docker-compose.yml ecommerce
+            docker stack deploy --with-registry-auth -c ~/docker-compose.yml ecommerce
